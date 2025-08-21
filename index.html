@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smooth Modern 3D Clock</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .clock {
+      position: relative;
+      width: min(90vw, 90vh); /* auto responsive */
+      aspect-ratio: 1;
+      background: url("clock.jpg") no-repeat center/cover;
+      border-radius: 50%;
+      border: 6px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 0 30px rgba(0,255,255,0.7), inset 0 0 20px rgba(255,255,255,0.3);
+      transform: perspective(1000px) rotateX(10deg);
+    }
+
+    .hand {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: center bottom;
+      border-radius: 8px;
+    }
+
+    /* Shorter hands */
+    .hour {
+      width: 12px;
+      height: 22%; /* shorter */
+      background: linear-gradient(to top, #FFD700, #fff3b0);
+      box-shadow: 0 0 8px rgba(255,215,0,0.8);
+      z-index: 3;
+    }
+
+    .minute {
+      width: 8px;
+      height: 30%; /* shorter */
+      background: linear-gradient(to top, #ff5252, #ffcdd2);
+      box-shadow: 0 0 6px rgba(255,82,82,0.8);
+      z-index: 2;
+    }
+
+    .second {
+      width: 3px;
+      height: 36%; /* shorter */
+      background: linear-gradient(to top, #00e5ff, #b3faff);
+      box-shadow: 0 0 10px rgba(0,229,255,0.9);
+      z-index: 1;
+    }
+
+    .center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 22px;
+      height: 22px;
+      background: #fff;
+      border: 3px solid #000;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 5;
+      box-shadow: 0 0 8px rgba(255,255,255,0.9);
+    }
+
+    #notice {
+      position: absolute;
+      bottom: 20px;
+      color: #0ff;
+      font-family: sans-serif;
+      font-size: 18px;
+      text-align: center;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="clock">
+    <div class="hand hour" id="hour"></div>
+    <div class="hand minute" id="minute"></div>
+    <div class="hand second" id="second"></div>
+    <div class="center"></div>
+  </div>
+
+  <!-- subtle ticking / ambient clock sound -->
+  <audio id="tick-sound" src="sou1.wav" preload="auto" loop></audio>
+
+  <div id="notice">Click anywhere to enable clock sound 🔊</div>
+
+  <script>
+    let soundEnabled = false;
+    const tick = document.getElementById("tick-sound");
+
+    function updateClock() {
+      const now = new Date();
+      const ms = now.getMilliseconds();
+      const seconds = now.getSeconds() + ms / 1000;
+      const minutes = now.getMinutes() + seconds / 60;
+      const hours = now.getHours() % 12 + minutes / 60;
+
+      const secondDeg = seconds * 6;       // 360 / 60
+      const minuteDeg = minutes * 6;       // 360 / 60
+      const hourDeg = hours * 30;          // 360 / 12
+
+      document.getElementById("second").style.transform =
+        `translate(-50%, -100%) rotate(${secondDeg}deg)`;
+      document.getElementById("minute").style.transform =
+        `translate(-50%, -100%) rotate(${minuteDeg}deg)`;
+      document.getElementById("hour").style.transform =
+        `translate(-50%, -100%) rotate(${hourDeg}deg)`;
+
+      requestAnimationFrame(updateClock);
+    }
+
+    requestAnimationFrame(updateClock);
+
+    // Enable sound after click
+    document.body.addEventListener("click", () => {
+      if (!soundEnabled) {
+        soundEnabled = true;
+        tick.volume = 0.4; // softer
+        tick.play();
+        document.getElementById("notice").style.display = "none";
+      }
+    }, { once: true });
+  </script>
+</body>
+</html>
